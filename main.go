@@ -57,12 +57,17 @@ func walk(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 
 func setupRoutes() *mux.Router {
 	gmux := mux.NewRouter()
-	s1 := gmux.NewRoute().Subrouter()
+	s1 := gmux.PathPrefix("/s1").Subrouter()
 	s2 := gmux.PathPrefix("/s2").Subrouter()
+	s3 := gmux.PathPrefix("/s3").Subrouter()
+
+	// s2 := gmux.NewRoute().Subrouter()
+
 	// s1a := s1.NewRoute().Subrouter()
+
 	// s1b := s1.NewRoute().Subrouter()
+
 	// s2a := s2.NewRoute().Subrouter()
-	s3 := gmux.NewRoute().Subrouter()
 
 	s1.Use(m1)
 	s2.Use(m2)
@@ -76,9 +81,10 @@ func setupRoutes() *mux.Router {
 	// mux. s1 will *always* come befroe s2, regardless of where the lines
 	// appear.  But within s2, insertion order of routes matters.
 	s1.Path("/s2/actuallys1").HandlerFunc(e1) // curl s2/actuallys1
-	s2.NewRoute().HandlerFunc(e2)             // curl /s2/*
-	s2.Path("/reallys2").HandlerFunc(e2real)  // curl /s2/reallys2
-	s3.Path("/s2/wontwork").HandlerFunc(e3)   // curl s2/wontwork
+	// s2.NewRoute().HandlerFunc(e2)               // curl /s2/*
+	s2.Path("/s2/reallys2").HandlerFunc(e2real) // curl /s2/reallys2
+	s3.Path("/s2/wontwork").HandlerFunc(e3)     // curl s2/wontwork won't match
+	s3.Path("/s3/easy").HandlerFunc(e3)         // curl s3/easy
 
 	return gmux
 }
