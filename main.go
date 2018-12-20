@@ -75,10 +75,10 @@ func setupRoutes() *mux.Router {
 	// router_ and submuxes are matched in the order they are added to the root
 	// mux. s1 will *always* come befroe s2, regardless of where the lines
 	// appear.  But within s2, insertion order of routes matters.
-	s1.Path("/s2/actuallys1").HandlerFunc(e1) // curl s2/actuallys2
+	s1.Path("/s2/actuallys1").HandlerFunc(e1) // curl s2/actuallys1
 	s2.NewRoute().HandlerFunc(e2)             // curl /s2/*
 	s2.Path("/reallys2").HandlerFunc(e2real)  // curl /s2/reallys2
-	s3.Path("/s2/actuallys3").HandlerFunc(e3) // curl s2/actuallys3 *won't work*
+	s3.Path("/s2/wontwork").HandlerFunc(e3)   // curl s2/wontwork
 
 	return gmux
 }
