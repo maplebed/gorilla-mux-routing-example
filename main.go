@@ -5,10 +5,11 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	fmt.Println("launching example app")
+	logrus.Infoln("launching example app")
 
 	rootMux := setupRoutes()
 
@@ -18,9 +19,9 @@ func main() {
 
 	err := http.ListenAndServe("localhost:8080", rootMux)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Infoln(err)
 	}
-	fmt.Println("all done")
+	logrus.Infoln("all done")
 }
 
 func walk(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
@@ -75,7 +76,7 @@ func setupRoutes() *mux.Router {
 	// mux. s1 will *always* come befroe s2, regardless of where the lines
 	// appear.  But within s2, insertion order of routes matters.
 	s1.Path("/s2/actuallys1").HandlerFunc(e1) // curl s2/actuallys2
-	s2.PathPrefix("/s2").HandlerFunc(e2)      // curl /s2/s2/*
+	s2.NewRoute().HandlerFunc(e2)             // curl /s2/*
 	s2.Path("/reallys2").HandlerFunc(e2real)  // curl /s2/reallys2
 	s3.Path("/s2/actuallys3").HandlerFunc(e3) // curl s2/actuallys3 *won't work*
 
@@ -84,56 +85,56 @@ func setupRoutes() *mux.Router {
 
 func mroot(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("starting mroot")
+		logrus.Infoln("starting mroot")
 		next.ServeHTTP(w, r)
-		fmt.Println("leaving mroot")
+		logrus.Infoln("leaving mroot")
 	})
 }
 
 func m1(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("starting m1")
+		logrus.Infoln("starting m1")
 		next.ServeHTTP(w, r)
-		fmt.Println("leaving m1")
+		logrus.Infoln("leaving m1")
 	})
 }
 
 func m2(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("starting m2")
+		logrus.Infoln("starting m2")
 		next.ServeHTTP(w, r)
-		fmt.Println("leaving m2")
+		logrus.Infoln("leaving m2")
 	})
 }
 
 func m3(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("starting m3")
+		logrus.Infoln("starting m3")
 		next.ServeHTTP(w, r)
-		fmt.Println("leaving m3")
+		logrus.Infoln("leaving m3")
 	})
 }
 
 func e1(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("starting e1")
+	logrus.Infoln("starting e1")
 	w.Write([]byte("found e1\n"))
-	fmt.Println("ending e1")
+	logrus.Infoln("ending e1")
 }
 
 func e2(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("starting e2")
+	logrus.Infoln("starting e2")
 	w.Write([]byte("found e2\n"))
-	fmt.Println("ending e2")
+	logrus.Infoln("ending e2")
 }
 
 func e2real(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("starting e2real")
+	logrus.Infoln("starting e2real")
 	w.Write([]byte("found e2real\n"))
-	fmt.Println("ending e2real")
+	logrus.Infoln("ending e2real")
 }
 
 func e3(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("starting e3")
+	logrus.Infoln("starting e3")
 	w.Write([]byte("found e3\n"))
-	fmt.Println("ending e3")
+	logrus.Infoln("ending e3")
 }
