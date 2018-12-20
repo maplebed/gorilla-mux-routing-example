@@ -77,3 +77,47 @@ INFO[0029] ending e3
 INFO[0029] leaving m3
 INFO[0029] leaving mroot
 ```
+
+
+For run, try:
+```bash
+➜  for i in 0 1 ; do for j in 1 2 3 ; do echo -n "calling 808${i}/s${j}/hello:  "; curl http://localhost:808${i}/s${j}/hello; done; done
+calling 8080/s1/hello:  found e1
+calling 8080/s2/hello:  found e2
+calling 8080/s3/hello:  found e3
+calling 8081/s1/hello:  found e1
+calling 8081/s2/hello:  found e2
+calling 8081/s3/hello:  found e3
+```
+
+and expect to see
+```
+INFO[0124] starting mroot      // start port 8080, get middleware only for e1
+INFO[0124] starting m1
+INFO[0124] starting e1
+INFO[0124] ending e1
+INFO[0124] leaving m1
+INFO[0124] leaving mroot
+INFO[0124] starting e2         // starting e2, missing middleware
+INFO[0124] ending e2
+INFO[0124] starting e3         // starting e3, missing middleware
+INFO[0124] ending e3
+INFO[0124] starting mroot      // start port 8081, get middleware for all
+INFO[0124] starting m1
+INFO[0124] starting e1
+INFO[0124] ending e1
+INFO[0124] leaving m1
+INFO[0124] leaving mroot
+INFO[0124] starting mroot      // starting e2
+INFO[0124] starting m2
+INFO[0124] starting e2
+INFO[0124] ending e2
+INFO[0124] leaving m2
+INFO[0124] leaving mroot
+INFO[0124] starting mroot      // starting e3
+INFO[0124] starting m3
+INFO[0124] starting e3
+INFO[0124] ending e3
+INFO[0124] leaving m3
+INFO[0124] leaving mroot
+```
