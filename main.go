@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,80 +10,55 @@ import (
 func main() {
 	logrus.Infoln("launching example app")
 
-	rootMux := setupRoutes()
+	brokenMux := setupBrokenMiddleware()
+	workingMux := setupWorkingMiddleware()
 
-	// spew.Dump(rootMux)
+	go http.ListenAndServe("localhost:8080", brokenMux)
+	http.ListenAndServe("localhost:8081", workingMux)
 
-	rootMux.Walk(walk)
-
-	err := http.ListenAndServe("localhost:8080", rootMux)
-	if err != nil {
-		logrus.Infoln(err)
-	}
 	logrus.Infoln("all done")
 }
 
-func walk(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
-	tmpl, _ := route.GetPathTemplate()
-	fmt.Printf("route: %s, handler: %v\n", tmpl, route.GetHandler())
-	return nil
+func setupBrokenMiddleware() *mux.Router {
+
+	// create a mux and some submuxes
+	gmux := mux.NewRouter()
+	s1 := gmux.NewRoute().Subrouter()
+	s2 := gmux.NewRoute().Subrouter()
+	s3 := gmux.NewRoute().Subrouter()
+
+	// add some middleware
+	gmux.Use(mroot)
+	s1.Use(m1)
+	s2.Use(m2)
+	s3.Use(m3)
+
+	// add some routes
+	s1.Path("/s1/hello").HandlerFunc(e1)
+	s2.Path("/s2/hello").HandlerFunc(e2)
+	s3.Path("/s3/hello").HandlerFunc(e3)
+
+	return gmux
 }
 
-// gmux
-// |
-// |\
-// |  > s1
-// |    |
-// |    |\
-// |    |  > s1a
-// |    |
-// |     \
-// |       > s1b
-// |
-// |\
-// |  > s2
-// |    |
-// |     \
-// |       > s2a
-// |
-//  \
-//    > s3
+func setupWorkingMiddleware() *mux.Router {
 
-// things to test
-// which middleware is run when?
-// what if different submuxes have the same route
-// what if different submuxes have a prefix and a full path that match
-
-func setupRoutes() *mux.Router {
+	// create a mux and some submuxes, this time with PathPrefixes
 	gmux := mux.NewRouter()
 	s1 := gmux.PathPrefix("/s1").Subrouter()
 	s2 := gmux.PathPrefix("/s2").Subrouter()
 	s3 := gmux.PathPrefix("/s3").Subrouter()
 
-	// s2 := gmux.NewRoute().Subrouter()
-
-	// s1a := s1.NewRoute().Subrouter()
-
-	// s1b := s1.NewRoute().Subrouter()
-
-	// s2a := s2.NewRoute().Subrouter()
-
+	// add some middleware
+	gmux.Use(mroot)
 	s1.Use(m1)
 	s2.Use(m2)
 	s3.Use(m3)
-	gmux.Use(mroot)
 
-	// first match wins. s2/actuallys1 is routable, s2/actuallys3 is not. It is
-	// shadowed by the s2 path prefix, which always matches. Note that the order
-	// of these three lines doesn't matter.  First match happens _within a
-	// router_ and submuxes are matched in the order they are added to the root
-	// mux. s1 will *always* come befroe s2, regardless of where the lines
-	// appear.  But within s2, insertion order of routes matters.
-	s1.Path("/s2/actuallys1").HandlerFunc(e1) // curl s2/actuallys1
-	// s2.NewRoute().HandlerFunc(e2)               // curl /s2/*
-	s2.Path("/s2/reallys2").HandlerFunc(e2real) // curl /s2/reallys2
-	s3.Path("/s2/wontwork").HandlerFunc(e3)     // curl s2/wontwork won't match
-	s3.Path("/s3/easy").HandlerFunc(e3)         // curl s3/easy
+	// add some routes (remember the path prefixes)
+	s1.Path("/hello").HandlerFunc(e1)
+	s2.Path("/hello").HandlerFunc(e2)
+	s3.Path("/hello").HandlerFunc(e3)
 
 	return gmux
 }
