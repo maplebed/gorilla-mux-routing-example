@@ -107,12 +107,6 @@ func e2(w http.ResponseWriter, r *http.Request) {
 	logrus.Infoln("ending e2")
 }
 
-func e2real(w http.ResponseWriter, r *http.Request) {
-	logrus.Infoln("starting e2real")
-	w.Write([]byte("found e2real\n"))
-	logrus.Infoln("ending e2real")
-}
-
 func e3(w http.ResponseWriter, r *http.Request) {
 	logrus.Infoln("starting e3")
 	w.Write([]byte("found e3\n"))
