@@ -25,9 +25,9 @@ time to explore 404 handlers. How do 404 handlers on submuxes affect future rout
 * pathprefix /s1 on a subrouter
 * path /s1/root defined on parent router
 * if subrouter has a custom NotFoundHandler
-** request for /s1/root hits subrouter's NotFoundHandler
+  * request for /s1/root hits subrouter's NotFoundHandler
 * if subrouter has the default NotFoundHandler
-** request for /s1/root hits the path defined on the parent router
+  * request for /s1/root hits the path defined on the parent router
 
 in one terminal:
 ```bash
@@ -35,14 +35,11 @@ $ go run main.go
 ```
 
 in the other terminal:
-```bash
-$ curl localhost:8080/s2/aoeu
-found e2
-$ curl localhost:8080/s2/actuallys1
-found e1
-$ curl localhost:8080/s2/actuallys3
-found e2
-
+```bash➜  for i in /s1/aoeu /s1/root /s2/aoeu /s2/root ; do curl "localhost:8080$i" ; done
+responding notFoundSub
+responding notFoundSub
+responding notFound
+found e2root
 ```
 
 When you issue each curl, you should also see output in the first terminal
@@ -50,12 +47,18 @@ window showing a log entry when each middleware or handler is entered and
 exitted so you can see call order.
 
 ```bash
-INFO[0004] starting mroot
-INFO[0004] starting m1
-INFO[0004] starting e1
-INFO[0004] ending e1
-INFO[0004] leaving m1
-INFO[0004] leaving mroot
-INFO[0010] starting e2
-INFO[0010] ending e2
+INFO[0006] starting notFoundSub
+INFO[0006] ending notFoundSub
+INFO[0006] starting notFoundSub
+INFO[0006] ending notFoundSub
+INFO[0006] starting notFound
+INFO[0006] ending notFound
+INFO[0006] starting e2root
+INFO[0006] ending e2root
 ```
+
+This illustrates a call to
+* `/s1/aoeu` is answered by the s1 submux NotFoundHandler
+* `/s1/root` is answered by the s1 submux NotFoundHandler (despite having another route defined)
+* `/s2/aoeu` is answered by the s2 submux root mux NotFoundHandler
+* `/s2/root` is answered by the specific route handler
