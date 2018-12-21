@@ -27,6 +27,7 @@ func setupRoutes() *mux.Router {
 	sPub := gmux.Host("public").Subrouter()
 	sPriv := gmux.Host("private").Subrouter()
 
+	// main submux gets all paths registered.
 	mainSub := mux.NewRouter()
 	mainSub.HandleFunc("/public/e1", e1)
 	mainSub.HandleFunc("/private/e2", e2)
