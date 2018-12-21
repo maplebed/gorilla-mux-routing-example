@@ -7,6 +7,27 @@ Use two terminals to play with this - one to run the server and watch its output
 
 It will listen on localhost:8080
 
+## On this branch
+
+time to explore 404 handlers. How do 404 handlers on submuxes affect future route matching? 404 without a default handler doesn't run middleware; does adding a custom 404 handler change that? Is it better to use a 404 handler to redirect or a wildcard path match?
+
+### no submuxes
+* `*mux.Router.NotFoundHandler` <-- takes a handler to run when a route isn't matched.
+* does not run middleware when a route is not found
+
+### not found on a submux
+* request matches submux's prefix
+* middleware on parent mux still runs
+* middleware on submux does not run
+* 404 handler on submux runs
+
+### not found on subrouter with a path that matches later in the parent mux
+* pathprefix /s1 on a subrouter
+* path /s1/root defined on parent router
+* if subrouter has a custom NotFoundHandler
+** request for /s1/root hits subrouter's NotFoundHandler
+* if subrouter has the default NotFoundHandler
+** request for /s1/root hits the path defined on the parent router
 
 in one terminal:
 ```bash
