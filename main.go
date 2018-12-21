@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
@@ -61,6 +62,15 @@ func setupRoutes() *mux.Router {
 	s2 := gmux.PathPrefix("/s2").Subrouter()
 	s3 := gmux.PathPrefix("/s3").Subrouter()
 
+	indMux := mux.NewRouter()
+	indMux.Path("/echo").HandlerFunc(e3)
+	indMux.PathPrefix("/").HandlerFunc(echo)
+
+	gmux.Handle("/ind", indMux)
+
+	gmux.PathPrefix("/").HandlerFunc(e1)
+	gmux.Path("/")
+
 	// s2 := gmux.NewRoute().Subrouter()
 
 	// s1a := s1.NewRoute().Subrouter()
@@ -85,6 +95,8 @@ func setupRoutes() *mux.Router {
 	s2.Path("/s2/reallys2").HandlerFunc(e2real) // curl /s2/reallys2
 	s3.Path("/s2/wontwork").HandlerFunc(e3)     // curl s2/wontwork won't match
 	s3.Path("/s3/easy").HandlerFunc(e3)         // curl s3/easy
+	s3.Path("/{myvar}").HandlerFunc(e3var)
+	s3.Path("/foo").HandlerFunc(e3fixed)
 
 	return gmux
 }
@@ -143,4 +155,23 @@ func e3(w http.ResponseWriter, r *http.Request) {
 	logrus.Infoln("starting e3")
 	w.Write([]byte("found e3\n"))
 	logrus.Infoln("ending e3")
+}
+func e3var(w http.ResponseWriter, r *http.Request) {
+	logrus.Infoln("starting e3var")
+	word := mux.Vars(r)["myvar"]
+	w.Write([]byte("found e3var: " + word + "\n"))
+	logrus.Infoln("ending e3var")
+}
+func e3fixed(w http.ResponseWriter, r *http.Request) {
+	logrus.Infoln("starting e3fixed")
+	w.Write([]byte("found e3fixed\n"))
+	logrus.Infoln("ending e3fixed")
+}
+
+func echo(w http.ResponseWriter, r *http.Request) {
+	logrus.Infoln("starting echo")
+	w.Write([]byte("found echo\n"))
+	route := mux.CurrentRoute(r)
+	spew.Dump(route)
+	logrus.Infoln("ending echo")
 }
