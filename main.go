@@ -58,7 +58,9 @@ func walk(route *mux.Route, router *mux.Router, ancestors []*mux.Route) error {
 
 func setupRoutes() *mux.Router {
 	gmux := mux.NewRouter()
-	s1 := gmux.PathPrefix("/s1").Subrouter()
+	gmux.NotFoundHandler = http.NotFoundHandler()
+	s1 := gmux.Host("{em:^em.*}").Subrouter()
+	s1.PathPrefix("/").HandlerFunc(e1)
 	s2 := gmux.PathPrefix("/s2").Subrouter()
 	s3 := gmux.PathPrefix("/s3").Subrouter()
 
@@ -68,8 +70,7 @@ func setupRoutes() *mux.Router {
 
 	gmux.Handle("/ind", indMux)
 
-	gmux.PathPrefix("/").HandlerFunc(e1)
-	gmux.Path("/")
+	gmux.PathPrefix("/").HandlerFunc(e2)
 
 	// s2 := gmux.NewRoute().Subrouter()
 
