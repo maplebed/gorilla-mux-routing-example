@@ -26,8 +26,8 @@ func setupRoutes() *mux.Router {
 	gmux := mux.NewRouter()
 
 	// our service is reachable via either a public or a private host
-	sPub := gmux.Host("public").Subrouter()
-	sPriv := gmux.Host("private").Subrouter()
+	sPub := gmux.Host("{hostvar:public}").Subrouter()
+	sPriv := gmux.Host("{hostvar:private}").Subrouter()
 
 	// main submux gets all paths registered.
 	mainSub := mux.NewRouter()
@@ -55,6 +55,8 @@ func mRoot(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infoln("starting mRoot")
 		r = r.WithContext(context.WithValue(r.Context(), "rootkey", "rootval"))
+		hostvar := mux.Vars(r)["hostvar"]
+		logrus.WithField("hostvar", hostvar).Infoln("at middleware root hostvar contents")
 		next.ServeHTTP(w, r)
 		logrus.Infoln("leaving mRoot")
 		fmt.Println("")
@@ -65,6 +67,8 @@ func mPub(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infoln("starting mPub")
 		r = r.WithContext(context.WithValue(r.Context(), "mPubKey", "mPubVal"))
+		hostvar := mux.Vars(r)["hostvar"]
+		logrus.WithField("hostvar", hostvar).Infoln("at middleware pub hostvar contents")
 		next.ServeHTTP(w, r)
 		logrus.Infoln("leaving mPub")
 	})
@@ -74,6 +78,8 @@ func mPriv(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infoln("starting mPriv")
 		r = r.WithContext(context.WithValue(r.Context(), "mPrivKey", "mPrivVal"))
+		hostvar := mux.Vars(r)["hostvar"]
+		logrus.WithField("hostvar", hostvar).Infoln("at middleware priv hostvar contents")
 		next.ServeHTTP(w, r)
 		logrus.Infoln("leaving mPriv")
 	})
@@ -83,6 +89,8 @@ func mMain(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infoln("starting mMain")
 		r = r.WithContext(context.WithValue(r.Context(), "mMainKey", "mMainVal"))
+		hostvar := mux.Vars(r)["hostvar"]
+		logrus.WithField("hostvar", hostvar).Infoln("at middleware main hostvar contents")
 		next.ServeHTTP(w, r)
 		logrus.Infoln("leaving mMain")
 	})
