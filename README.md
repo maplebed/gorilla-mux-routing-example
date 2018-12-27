@@ -7,9 +7,9 @@ Use two terminals to play with this - one to run the server and watch its output
 
 It will listen on localhost:8080
 
-## this branch submux_dag
+## this branch discon_mux_context
 
-this branch is to play with the idea of using submuxes in a directed acyclic graph (dag).
+this branch builds on submux_dag to play with the idea of using submuxes in a directed acyclic graph (dag) - it tests whether doing so drops the request context
 
 the idea:
 * I have many endpoints

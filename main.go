@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
@@ -52,6 +54,7 @@ func setupRoutes() *mux.Router {
 func mRoot(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infoln("starting mRoot")
+		r = r.WithContext(context.WithValue(r.Context(), "rootkey", "rootval"))
 		next.ServeHTTP(w, r)
 		logrus.Infoln("leaving mRoot")
 		fmt.Println("")
@@ -61,6 +64,7 @@ func mRoot(next http.Handler) http.Handler {
 func mPub(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infoln("starting mPub")
+		r = r.WithContext(context.WithValue(r.Context(), "mPubKey", "mPubVal"))
 		next.ServeHTTP(w, r)
 		logrus.Infoln("leaving mPub")
 	})
@@ -69,6 +73,7 @@ func mPub(next http.Handler) http.Handler {
 func mPriv(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infoln("starting mPriv")
+		r = r.WithContext(context.WithValue(r.Context(), "mPrivKey", "mPrivVal"))
 		next.ServeHTTP(w, r)
 		logrus.Infoln("leaving mPriv")
 	})
@@ -77,6 +82,7 @@ func mPriv(next http.Handler) http.Handler {
 func mMain(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		logrus.Infoln("starting mMain")
+		r = r.WithContext(context.WithValue(r.Context(), "mMainKey", "mMainVal"))
 		next.ServeHTTP(w, r)
 		logrus.Infoln("leaving mMain")
 	})
@@ -84,12 +90,14 @@ func mMain(next http.Handler) http.Handler {
 
 func e1(w http.ResponseWriter, r *http.Request) {
 	logrus.Infoln("starting e1")
+	spew.Dump(r.Context()) // has gorilla stuff, then root, pub, gorilla stuff, then main
 	w.Write([]byte("found e1\n"))
 	logrus.Infoln("ending e1")
 }
 
 func e2(w http.ResponseWriter, r *http.Request) {
 	logrus.Infoln("starting e2")
+	spew.Dump(r.Context())
 	w.Write([]byte("found e2\n"))
 	logrus.Infoln("ending e2")
 }
